@@ -68,7 +68,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 							: __("Cannot find Item with this Barcode"),
 						"red"
 					);
-					this.clean_up();
+					refresh_field(this.items_table_name);
 					this.play_fail_sound();
 					reject();
 					return;
@@ -123,7 +123,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			if (!row) {
 				if (this.dont_allow_new_row) {
 					this.show_alert(__("Maximum quantity scanned for item {0}.", [item_code]), "red");
-					this.clean_up();
+					refresh_field(this.items_table_name);
 					reject();
 					return;
 				}
@@ -136,7 +136,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			}
 
 			if (this.is_duplicate_serial_no(row, serial_no)) {
-				this.clean_up();
+				refresh_field(this.items_table_name);
 				reject();
 				return;
 			}
@@ -151,7 +151,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 					}),
 				() => this.set_serial_no(row, serial_no),
 				() => this.set_batch_no(row, batch_no),
-				() => this.clean_up(),
+				() => refresh_field(this.items_table_name),
 				() => this.set_barcode_uom(row, uom),
 				() => this.revert_selector_flag(),
 				() => resolve(row),
@@ -220,7 +220,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				() => this.set_barcode(row, this.dialog.get_value("barcode")),
 				() => this.set_serial_no(row, this.dialog.get_value("serial_no")),
 				() => this.add_child_for_remaining_qty(row),
-				() => this.clean_up(),
+				() => refresh_field(this.items_table_name),
 			]);
 
 			this.dialog.hide();
@@ -562,10 +562,6 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		this.fail_sound && frappe.utils.play_sound(this.fail_sound);
 	}
 
-	clean_up() {
-		this.scan_barcode_field.set_value("");
-		refresh_field(this.items_table_name);
-	}
 	show_alert(msg, indicator, duration = 3) {
 		frappe.show_alert({ message: msg, indicator: indicator }, duration);
 	}
